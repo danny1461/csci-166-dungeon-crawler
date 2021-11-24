@@ -3,6 +3,7 @@
 A simple project utilizing full AI agents for enemies and heroes and seeing what strategies arise through trials.
 
 TODO:
+
 - [ ] Implement entry file
 - [ ] Offload process argument processing to helper class so Agent class can know what feature extractor was requested
 - [ ] Implement simple graphics library
