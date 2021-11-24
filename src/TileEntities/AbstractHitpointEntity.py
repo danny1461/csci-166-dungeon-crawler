@@ -1,4 +1,4 @@
-from .Abstract import Abstract
+from TileEntities.Abstract import Abstract
 
 class AbstractHitpointEntity(Abstract):
 	traversable = False
@@ -10,6 +10,7 @@ class AbstractHitpointEntity(Abstract):
 
 	def damage(self, amount):
 		self.health = max(0, self.health - amount)
+		self.log('Entity {} takes {} damage. {} remaining'.format(self.__class__.__name__, amount, self.health))
 
 	def heal(self, amount):
 		self.health = min(type(self).maxHitPoints, self.health + amount)

@@ -1,3 +1,8 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+	from GridWorld import GridWorld
+
 from abc import ABC, abstractmethod
 
 class Abstract(ABC):
@@ -6,7 +11,7 @@ class Abstract(ABC):
 	traversable = True
 	team = 'gaia'
 
-	def __init__(self, gridWorld):
+	def __init__(self, gridWorld: GridWorld):
 		self.id = Abstract.nextId
 		Abstract.nextId += 1
 
@@ -30,10 +35,11 @@ class Abstract(ABC):
 
 	@property
 	def y(self):
-		self.gridWorld.getTileEntityLocation(self)[1]
+		return self.gridWorld.getTileEntityLocation(self)[1]
 
-	def move(self, newX, newY):
-		self.gridWorld.moveTileEntity(self, newX, newY)
+	@property
+	def nearbyTiles(self):
+		return self.gridWorld.getNearbyTiles(self.gridWorld.getTileEntityLocation(self))
 
 	@abstractmethod
 	def tick(self):
@@ -41,3 +47,37 @@ class Abstract(ABC):
 
 	def log(self, *args):
 		self.gridWorld.log(*args)
+
+	def searchTile(self, tileIteratable, predicate):
+		if isinstance(predicate, type):
+			cls = predicate
+			predicate = lambda tile: any([isinstance(tileItem, cls) for tileItem in self.gridWorld.getTileData(tile)])
+
+		for tile in tileIteratable:
+			if predicate(tile):
+				yield tile
+
+	def searchTileFirst(self, tileIterable, predicate):
+		for tile in self.searchTile(tileIterable, predicate):
+			return tile
+
+		return None
+
+	def searchTileItem(self, tileIterable, predicate):
+		if isinstance(predicate, type):
+			cls = predicate
+			predicate = lambda tileItem: isinstance(tileItem, cls)
+		elif type(predicate) == str:
+			tileChar = predicate
+			predicate = lambda tileItem: tileItem == tileChar
+
+		for tile in tileIterable:
+			for tileItem in self.gridWorld.getTileData(tile):
+				if predicate(tileItem):
+					yield (tileItem, tile)
+
+	def searchTileItemFirst(self, tileIterable, predicate):
+		for data in self.searchTileItem(tileIterable, predicate):
+			return data
+
+		return (None, None)

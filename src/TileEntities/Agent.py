@@ -1,5 +1,11 @@
-from .AbstractHitpointEntity import AbstractHitpointEntity
+from TileEntities.AbstractMovableEntity import AbstractMovableEntity
+from TileEntities.AbstractHitpointEntity import AbstractHitpointEntity
+from TileEntities.AbstractAggresiveEntity import AbstractAggresiveEntity
 
-class Agent(AbstractHitpointEntity):
+class Agent(AbstractMovableEntity, AbstractHitpointEntity, AbstractAggresiveEntity):
 	team = 'agent'
 	maxHitPoints = 100
+	attackDamage = 10
+
+	def tick(self):
+		self.log('Agent does nothing')

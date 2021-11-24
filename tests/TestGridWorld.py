@@ -11,4 +11,4 @@ class Test(TestCase):
 		g = GridWorld('./dungeons/empty.txt')
 		for i in range(2):
 			for j in range(2):
-				self.assertEquals(g.getTileData(i, j)[0], ' ', '4 Blank spaces')
+				self.assertEquals(g.getTileData( (i, j) )[0], ' ', '4 Blank spaces')
