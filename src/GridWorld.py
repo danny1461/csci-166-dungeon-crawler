@@ -193,3 +193,6 @@ class GridWorld:
 			if len(self.teams[team]) == 0:
 				self.teamList.remove(team)
 				self.teamNdx -= 1
+
+for key, val in list(GridWorld.tileEntityMap.items()):
+	GridWorld.tileEntityMap[val] = key
