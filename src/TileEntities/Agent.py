@@ -8,4 +8,7 @@ class Agent(AbstractMovableEntity, AbstractHitpointEntity, AbstractAggresiveEnti
 	attackDamage = 10
 
 	def tick(self):
+		#self.log(self.pos)
 		self.log('Agent does nothing')
+
+	
