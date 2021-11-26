@@ -156,11 +156,16 @@ class GridWorld:
 
 	def moveTileEntity(self, entity, pos: Tile):
 		if entity not in self.entities:
-			return
+			return False
+
+		if not self.isTileTraversable(pos):
+			return False
 
 		self.map[entity.pos].remove(entity)
 		self.entities[entity] = pos
 		self.map[entity.pos].append(entity)
+
+		return True
 
 	def log(self, *args):
 		if self.logging:
