@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from math import ceil
 if TYPE_CHECKING:
 	from GridWorld import GridWorld
 
@@ -42,9 +41,10 @@ class Abstract(ABC):
 	def nearbyTiles(self):
 		return self.gridWorld.getNearbyTiles(self.gridWorld.getTileEntityLocation(self))
 
+	# get the current turn of the world 
 	@property
 	def turn(self):
-		return ceil(self.gridWorld.ticks / len(self.gridWorld.entities))
+		return int(self.gridWorld.ticks / len(self.gridWorld.entities)) + 1
 
 	@abstractmethod
 	def tick(self):
