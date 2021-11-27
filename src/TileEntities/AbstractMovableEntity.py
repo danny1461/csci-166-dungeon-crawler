@@ -23,7 +23,7 @@ class AbstractMovableEntity(Abstract):
 			horz = -1
 		if meDir in ('west', 'right'):
 			horz = 1
-		self.move((self.x + (horz), self.y + (vert)))			
+		self.move((self.x + (horz), self.y + (vert)))
 
 	# move agent towards a tile in the dungeon
 	def moveTowards(self, pos: Tile):

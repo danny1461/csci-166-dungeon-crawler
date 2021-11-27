@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ValuesView
 if TYPE_CHECKING:
 	from GridWorld import GridWorld
 
@@ -41,10 +41,13 @@ class Abstract(ABC):
 	def nearbyTiles(self):
 		return self.gridWorld.getNearbyTiles(self.gridWorld.getTileEntityLocation(self))
 
-	# get the current turn of the world 
 	@property
 	def turn(self):
-		return int(self.gridWorld.ticks / len(self.gridWorld.entities)) + 1
+		return self.gridWorld.getTurn()
+
+	@property
+	def randomPercent(self):
+		return self.gridWorld.getRandomPercent()
 
 	@abstractmethod
 	def tick(self):
@@ -86,3 +89,27 @@ class Abstract(ABC):
 			return data
 
 		return (None, None)
+
+	# check if tile is viewable from a given tile using a distance
+	def isInRange(self, fromTile, toTile, distance: int):
+		possibleTiles = self.gridWorld.getTilesWithinManhatenDistance(fromTile, distance)
+		
+		return self.gridWorld.isTileInRange(possibleTiles, toTile)
+
+	# check if a tile is traverseable
+	def isTraverseable(self, tile):
+		return self.gridWorld.isTileTraversable(tile)
+
+	"""
+	If we have time later to perhaps implement properly...
+
+	# get tiles from some viewable tiles (mutiple and attempt to return a dictionary)
+	def tilesToPossiblyView(self, tilesIterable, toTiles, distance: int):
+		viewable = {'distance': distance}
+		for fromTile in tilesIterable:
+			for toTile in toTiles:
+				if(self.isPossiblyViewable(fromTile, toTile, distance)):
+					viewable[fromTile] = toTile
+		
+		return viewable
+	"""				

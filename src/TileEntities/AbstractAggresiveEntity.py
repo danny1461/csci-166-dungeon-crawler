@@ -5,7 +5,7 @@ from Aliases.Tile import Tile
 class AbstractAggresiveEntity(Abstract):
 	attackDamage = 1
 
-	# for directly attacking an entity 
+	# for directly attacking an entity (can be a player or non-player)
 	def attackEntity(self, entity: AbstractHitpointEntity):
 		entity.damage(type(self).attackDamage)
 

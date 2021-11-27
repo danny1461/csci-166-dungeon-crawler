@@ -3,6 +3,7 @@ from TileEntities.AbstractHitpointEntity import AbstractHitpointEntity
 from TileEntities.Agent import Agent
 from TileEntities.Monster import Monster
 from TileEntities.SpikeTrap import SpikeTrap
+from random import random
 from Aliases.Tile import Tile
 
 class GridWorld:
@@ -94,6 +95,14 @@ class GridWorld:
 
 		return True
 
+	# check if a tile is in a tuple/set of tiles
+	def isTileInRange(self, fromPos: Tile, toPos: Tile):
+		for tile in fromPos:
+			if(tile == toPos):
+				return True
+		
+		return False
+
 	def getNearbyTiles(self, pos: Tile):
 		for dx, dy in GridWorld.transitionDirections:
 			t = (pos[0] + dx, pos[1] + dy)
@@ -170,6 +179,14 @@ class GridWorld:
 	def log(self, *args):
 		if self.logging:
 			print(*args)
+
+	# get current turn of world
+	def getTurn(self):
+		return int(self.ticks/len(self.entities)) + 1
+
+	# return a random percent
+	def getRandomPercent(self):
+		return random()
 
 	def tick(self):
 		self.ticks += 1
