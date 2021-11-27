@@ -9,6 +9,7 @@ class Agent(AbstractMovableEntity, AbstractHitpointEntity, AbstractAggresiveEnti
 
 	def tick(self):
 		#self.log(self.pos)
+		#self.log(self.turn)
 		self.log('Agent does nothing')
 
 	
