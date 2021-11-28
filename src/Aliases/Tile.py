@@ -1,1 +1,0 @@
-Tile = tuple[int, int]

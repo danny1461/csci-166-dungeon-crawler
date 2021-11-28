@@ -10,4 +10,31 @@ class Monster(AbstractMovableEntity, AbstractHitpointEntity, AbstractAggresiveEn
 	attackDamage = 5
 
 	def tick(self):
-		self.log('Monster does nothing')
+		return
+		# Is an agent right next to us?
+		agentTile = self.searchTileFirst(self.nearbyTiles, Agent)
+		if agentTile != None:
+			self.log('Monster attacks agent at:', agentTile)
+			self.attackTile(agentTile)
+			return
+
+		# Can we find an agent within 3 blocks?
+		agentTile = self.searchTileFirst(self.gridWorld.djikstraSearch(self.pos, maxDistance = 3), Agent)
+		if agentTile != None:
+			self.log('Monster moves towards agent at:', agentTile)
+			self.moveTowards(agentTile)
+			return
+
+		# Move randomly but don't move onto a tile that will attack us
+		options = []
+		for tile in self.nearbyTraversableTiles:
+			for tileItem in self.gridWorld.getTileData(tile):
+				if isinstance(tileItem, AbstractAggresiveEntity):
+					break
+			else:
+				options.append(tile)
+
+		if len(options) > 0:
+			nextTile = choice(options)
+			self.log('Monster moves randomly to:', nextTile)
+			self.move(nextTile)
