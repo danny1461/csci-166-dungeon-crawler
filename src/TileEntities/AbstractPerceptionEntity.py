@@ -5,44 +5,23 @@ from Aliases.Tile import Tile
 class AbstractPerceptionEntity(Abstract):
 	saw = False
 	viewDistance = 5
-	losBlocked = False
-	tracerPos = (0,0)
+	los = True
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.distance = type(self).viewDistance
-		self.tracer = self.tracerPos
 
-	# is line of sight blocked (there is a wall/entity/object in the way)
-	def isLineOfSightBlocked(self, toPos: Tile):
-		self.tracer = self.pos
-		while (self.tracer != toPos):
-			xDiff = toPos[0] - self.tracer[0]
-			yDiff = toPos[1] - self.tracer[1]
-			
-			if abs(xDiff) >= abs(yDiff):
-				unit = xDiff / abs(xDiff)
-				self.tracer = ( (int(self.tracer[0] + unit), self.tracer[1]) )
-			
-			else:
-				unit = yDiff / abs(yDiff)
-				self.tracer = ( (self.tracer[0], int(self.tracer[1] + unit)) )
-				
-			# move agent towards a tile in the dungeon
-			if not(self.isTraverseable(self.tracer)):
-				self.losBlocked = True
-				break
-			else:
-				self.losBlocked = False
+	# has a line of sight to whatever tile desired (there is a wall/entity/object in the way)
+	def hasLineOfSight(self, toPos: Tile):
+		self.los = self.isBlineTraceable(self.pos, toPos)
 
-	# bugged right now, will fix later tonight
 	# if our entity can see another entity (at tile position) of some kind given a distance
 	def eyes(self, toPos: Tile, distance: int):
-		if not(self.isLineOfSightBlocked(toPos)):
+		if (self.isBlineTraceable(self.pos, toPos)):
 			if (self.isInRange(self.pos, toPos, distance)):
+				print("got here")
 				self.saw = True
-			else:
-				self.saw = False
+				
 		else:
 			self.saw = False
 

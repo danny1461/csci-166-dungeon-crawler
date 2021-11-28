@@ -10,19 +10,21 @@ class Agent(AbstractMovableEntity, AbstractHitpointEntity, AbstractAggresiveEnti
 	attackDamage = 10
 	# action cost is how many turns it will take to do an action
 	actionCost = 3
+	direction = "left"
 
 	def tick(self):
-
-		#self.log(self.pos)
+		self.log(self.pos)
 		#self.log(self.turn)
 		#self.actionCounter(self.actionCost)
 		#self.log(self.randomPercent)
 		#self.actionChance(1)
 		#self.log(self.chanceSuccessful)
-		#self.eyes((2,2), 50)
-		#print(self.didSee)
-		#self.isLineOfSightBlocked((2,2))
+		#self.eyes((2,2), 10)
+		#print("Did see the object: ", self.didSee)
+		#self.hasLineOfSight((2,2))
+		#print("Line of sight: ", self.los)
 		#self.move((2,10))
-		#self.moveDirection("left")
-		#print(self.losBlocked)
+		if(self.pos[0] == 1):
+			self.direction = "right"
+		self.moveDirection(self.direction)
 		self.log("Agent end log")

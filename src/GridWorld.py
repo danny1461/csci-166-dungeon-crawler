@@ -103,6 +103,31 @@ class GridWorld:
 		
 		return False
 
+	# can we trace from a tile to another tile directly in a B-line (straight to the point)
+	def isTileBlineTraceable(self, fromPos: Tile, toPos: Tile):
+		traceable = True # default assumes we can look at starting tile, so we can see ourselves 
+		tracer = fromPos
+		while (tracer != toPos):
+			xDiff = toPos[0] - tracer[0]
+			yDiff = toPos[1] - tracer[1]
+			
+			if abs(xDiff) >= abs(yDiff):
+				unit = xDiff / abs(xDiff)
+				tracer = ( (int(tracer[0] + unit), tracer[1]) )
+			
+			else:
+				unit = yDiff / abs(yDiff)
+				tracer = ( (tracer[0], int(tracer[1] + unit)) )
+				
+			if (self.isTileTraversable(tracer)):
+				traceable = True
+			else:
+				traceable = False
+				break
+
+		#print("Tracer ", tracer, traceable)
+		return traceable
+
 	def getNearbyTiles(self, pos: Tile):
 		for dx, dy in GridWorld.transitionDirections:
 			t = (pos[0] + dx, pos[1] + dy)

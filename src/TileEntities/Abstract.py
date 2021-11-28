@@ -100,6 +100,10 @@ class Abstract(ABC):
 	def isTraverseable(self, tile):
 		return self.gridWorld.isTileTraversable(tile)
 
+	# check if a tile is directly traceable via a B-line
+	def isBlineTraceable(self, fromTile, toTile):
+		return self.gridWorld.isTileBlineTraceable(fromTile, toTile)
+
 	"""
 	If we have time later to perhaps implement properly...
 
