@@ -93,7 +93,7 @@ class Abstract(ABC):
 	# check if tile is viewable from a given tile using a distance
 	def isInRange(self, fromTile, toTile, distance: int):
 		possibleTiles = self.gridWorld.getTilesWithinManhatenDistance(fromTile, distance)
-		
+
 		return self.gridWorld.isTileInRange(possibleTiles, toTile)
 
 	# check if a tile is traverseable
