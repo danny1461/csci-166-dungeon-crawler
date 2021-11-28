@@ -110,6 +110,6 @@ class Abstract(ABC):
 			for toTile in toTiles:
 				if(self.isPossiblyViewable(fromTile, toTile, distance)):
 					viewable[fromTile] = toTile
-		
+
 		return viewable
-	"""				
+	"""
