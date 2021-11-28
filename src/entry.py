@@ -9,7 +9,7 @@ from GridWorld import GridWorld
 # Kick off the process
 mapPath = os.path.join(os.getcwd(), '../dungeons/', commandLineArgs.map + '.txt')
 world = GridWorld(fromFile = mapPath, logging = commandLineArgs.logging)
-teamSortOrder = ['agent', 'monster', 'gaia']
+teamSortOrder = ['agent', 'human', 'monster', 'gaia']
 world.teamList.sort(key = lambda item: teamSortOrder.index(item))
 
 while len(world.teams['agent']) > 0:

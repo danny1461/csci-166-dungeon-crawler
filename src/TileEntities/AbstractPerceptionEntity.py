@@ -4,24 +4,24 @@ from Aliases.Tile import Tile
 
 class AbstractPerceptionEntity(Abstract):
 	saw = False
-	viewDistance = 5
+	perceptionViewDistance = 5
 	los = True
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		self.distance = type(self).viewDistance
+		self.distance = type(self).perceptionViewDistance
 
 	# has a line of sight to whatever tile desired (there is a wall/entity/object in the way)
 	def hasLineOfSight(self, toPos: Tile):
 		self.los = self.isBlineTraceable(self.pos, toPos)
 
 	# if our entity can see another entity (at tile position) of some kind given a distance
-	def eyes(self, toPos: Tile, distance: int):
+	def eyes(self, toPos: Tile):
 		if (self.isBlineTraceable(self.pos, toPos)):
-			if (self.isInRange(self.pos, toPos, distance)):
+			if (self.isInRange(self.pos, toPos, self.distance)):
 				print("got here")
 				self.saw = True
-				
+
 		else:
 			self.saw = False
 

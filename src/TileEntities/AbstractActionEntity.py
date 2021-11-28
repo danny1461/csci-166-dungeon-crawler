@@ -11,7 +11,7 @@ class AbstractActionEntity(Abstract):
 
     # an action counter for the point cost (resets to pointCost at 0)
     def actionCounter(self, pointCost):
-        if self.tookAction:
+        if (self.tookAction):
             self.cost = pointCost + 1
             self.log('Entity {} takes an action'.format(self.__class__.__name__))
         self.cost -= 1

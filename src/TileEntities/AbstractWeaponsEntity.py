@@ -1,18 +1,28 @@
 from TileEntities.Abstract import Abstract
-from TileEntities.Agent import Agent
+from Aliases.Tile import Tile
 
 class AbstractWeaponEntity(Abstract):
     weaponName = "default_weapon"
-    baseDamage = 10
-    damageMultiplier = 2.0
-    distanceReach = 1
-
+    weaponDamage = 10
+    weaponReach = 1
+    weaponAttackPossible = False
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.damage = self.baseDamage
-        self.multiplier = self.damageMultiplier
-        self.distance = self.distanceReach
-        self.charge = self.chargeTime
+        self.wepdamage = self.weaponDamage
+        self.distance = self.weaponReach
+        self.attackable = self.weaponAttackPossible
 
-    def isPossible(self, distance, enemy: Agent):
-        a=1
+    # can our weapon reach the target
+    def canWeaponReachTarget(self, targetPos: Tile):
+        if (self.isBlineTraceable(self.pos, targetPos)):
+            if (self.isInRange(self.pos, targetPos, self.distance)):
+                self.attackable = True
+            else:
+                self.attackable = False
+        else:
+            self.attackable = False
+
+    @property
+    def weaponDoesHit(self):
+        return self.attackable

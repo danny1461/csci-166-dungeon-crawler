@@ -26,6 +26,10 @@ class Abstract(ABC):
 		return self.id == other
 
 	@property
+	def allEntities(self):
+		return self.gridWorld.getEntities()
+
+	@property
 	def pos(self):
 		return self.gridWorld.getTileEntityLocation(self)
 

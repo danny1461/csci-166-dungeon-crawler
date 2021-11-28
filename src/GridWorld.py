@@ -1,6 +1,7 @@
 from TileEntities.Abstract import Abstract as AbstractTileEntity
 from TileEntities.AbstractHitpointEntity import AbstractHitpointEntity
 from TileEntities.Agent import Agent
+from TileEntities.Human import Human
 from TileEntities.Monster import Monster
 from TileEntities.SpikeTrap import SpikeTrap
 from random import random
@@ -10,6 +11,7 @@ class GridWorld:
 	transitionDirections = [(1, 0), (0, 1), (-1, 0), (0, -1)]
 	tileEntityMap = {
 		'A': Agent,
+		'H': Human,
 		'M': Monster,
 		'S': SpikeTrap,
 	}
@@ -73,6 +75,9 @@ class GridWorld:
 				self.height = y + 1
 
 			x += 1
+
+	def getEntities(self):
+		return self.entities
 
 	def isValidTile(self, pos: Tile):
 		if pos[0] < 0 or pos[0] >= self.width:
