@@ -191,9 +191,15 @@ class GridWorld:
 
 		return self.map[pos]
 
-	def getEntitiesAtLocation(self, pos: Tile):
+	def getEntitiesAtLocation(self, pos: Tile, predicate = None):
+		if predicate == None:
+			predicate = lambda entity: isinstance(entity, AbstractTileEntity)
+		elif isinstance(predicate, type):
+			cls = predicate
+			predicate = lambda entity: isinstance(entity, cls)
+
 		for tileItem in self.getTileData(pos):
-			if isinstance(tileItem, AbstractTileEntity):
+			if predicate == None or predicate(tileItem):
 				yield tileItem
 
 	def getTileEntityLocation(self, entity):
