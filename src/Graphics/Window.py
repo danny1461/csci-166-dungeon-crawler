@@ -1,5 +1,6 @@
 from Graphics.Abstract import Abstract
 from GridWorld import GridWorld
+from TileEntities.AbstractHitpointEntity import AbstractHitpointEntity
 from TileEntities.Agent import Agent
 from TileEntities.Monster import Monster
 from TileEntities.SpikeTrap import SpikeTrap
@@ -30,15 +31,24 @@ class Window(Abstract):
 			elif isinstance(entity, SpikeTrap):
 				fill = 'gray'
 
-			print(entity.__class__.__name__, fill)
-
-			self.entities[entity] = self.board.create_rectangle(
+			rect = self.board.create_rectangle(
 				entity.x * self.tileSize + 5,
 				entity.y * self.tileSize + 5,
 				(entity.x + 1) * self.tileSize - 5,
 				(entity.y + 1) * self.tileSize - 5,
 				fill = fill, width = 1, tag = entity.id
 			)
+
+			self.entities[entity] = {
+				'main': rect
+			}
+
+			if isinstance(entity, AbstractHitpointEntity):
+				self.entities[entity.id]['health'] = self.board.create_text(
+					entity.x * self.tileSize + (self.tileSize / 2),
+					entity.y * self.tileSize + (self.tileSize / 2),
+					fill = 'black', font = 'Times 20', text = entity.health
+				)
 
 	def renderStatic(self):
 		for x in range(self.gridWorld.width):
@@ -54,7 +64,8 @@ class Window(Abstract):
 		for entity in self.entities:
 			if entity not in self.gridWorld.entities:
 				toRemove.append(entity)
-				self.board.delete(self.entities[entity])
+				for i in self.entities[entity]:
+					self.board.delete(self.entities[entity][i])
 			else:
 				self.updateTileEntity(entity)
 
@@ -73,5 +84,9 @@ class Window(Abstract):
 		self.board.create_rectangle(x * self.tileSize, y * self.tileSize, (x + 1) * self.tileSize, (y + 1) * self.tileSize, fill = fill, width = 1)
 
 	def updateTileEntity(self, entity):
-		rect = self.entities[entity]
-		self.board.coords(rect, entity.x * self.tileSize + 5, entity.y * self.tileSize + 5, (entity.x + 1) * self.tileSize - 5, (entity.y + 1) * self.tileSize - 5)
+		data = self.entities[entity]
+		self.board.coords(data['main'], entity.x * self.tileSize + 5, entity.y * self.tileSize + 5, (entity.x + 1) * self.tileSize - 5, (entity.y + 1) * self.tileSize - 5)
+
+		if 'health' in data:
+			self.board.coords(data['health'], entity.x * self.tileSize + (self.tileSize / 2), entity.y * self.tileSize + (self.tileSize / 2))
+			self.board.itemconfigure(data['health'], text = entity.health)
