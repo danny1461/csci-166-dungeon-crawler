@@ -17,11 +17,17 @@ Going into the src folder and typing python.exe .\entry.py --h will present this
 >                        How many iterations to train with
 > --logging [LOGGING]   Whether to enable logging
 
+### Running
+`python.exe .\entry.py --map gaia --trainClass FirstTry`
+
+### Training
+`python.exe .\entry.py --map gaia --trainClass FirstTry --train 1 --trainIter 100`
+
 TODO:
 
 - [x] Implement entry file
 - [x] Offload process argument processing to helper class so Agent class can know what feature extractor was requested
-- [ ] Implement simple graphics library
-- [ ] Flesh out monster class
-- [ ] Flesh out agent class
-- [ ] Code up training wrapper for gridworld
+- [x] Implement simple graphics library
+- [x] Flesh out monster class
+- [x] Flesh out agent class
+- [x] Code up training wrapper for gridworld
