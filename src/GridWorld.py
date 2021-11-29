@@ -1,9 +1,11 @@
+from Apps.TrainingApp import TrainingApp
 from TileEntities.Abstract import Abstract as AbstractTileEntity
 from TileEntities.AbstractHitpointEntity import AbstractHitpointEntity
 from TileEntities.Agent import Agent
 from TileEntities.Monster import Monster
 from TileEntities.SpikeTrap import SpikeTrap
-from Aliases.Tile import Tile
+from Aliases import Tile
+from Utils.PriorityQueue import PriorityQueue
 
 class GridWorld:
 	transitionDirections = [(1, 0), (0, 1), (-1, 0), (0, -1)]
@@ -17,6 +19,8 @@ class GridWorld:
 		self.logging = logging
 		self.ticks = -1
 		self.teamNdx = -1
+		self.exitPos = None
+		self.trackingActions = False
 
 		if fromFile != None:
 			self.loadMapFile(fromFile)
@@ -42,6 +46,8 @@ class GridWorld:
 		self.entities: dict[AbstractTileEntity, Tile] = {}
 		self.teams: dict[str, list[AbstractTileEntity]] = {}
 		self.teamList: list[str] = []
+		self.trainer = TrainingApp()
+		
 		length = len(mapString)
 		while cursor < length:
 			c = mapString[cursor]
@@ -61,6 +67,9 @@ class GridWorld:
 				self.map[loc] = [' ', tileInst]
 				self.entities[tileInst] = loc
 
+				if isinstance(tileInst, Agent):
+					tileInst.setTrainer(self.trainer)
+
 				if tileInst.team not in self.teams:
 					self.teams[tileInst.team] = []
 					self.teamList.append(tileInst.team)
@@ -68,10 +77,21 @@ class GridWorld:
 			else:
 				self.map[loc] = [c]
 
+				if c == 'E':
+					self.exitPos = loc
+
 			if y >= self.height:
 				self.height = y + 1
 
 			x += 1
+
+		self.trainer.setGridWorld(self)
+
+	def getEntityById(self, entityId):
+		pos = self.getTileEntityLocation(entityId)
+		for tileItem in self.getEntitiesAtLocation(pos):
+			if tileItem.id == entityId:
+				return tileItem
 
 	def isValidTile(self, pos: Tile):
 		if pos[0] < 0 or pos[0] >= self.width:
@@ -81,13 +101,13 @@ class GridWorld:
 
 		return True
 
-	def isTileTraversable(self, pos: Tile):
+	def isTileTraversable(self, pos: Tile, excludeNonTraversableEntities = False):
 		if not self.isValidTile(pos):
 			return False
 
 		for tileData in self.map[pos]:
 			if isinstance(tileData, AbstractTileEntity):
-				if not tileData.traversable:
+				if not excludeNonTraversableEntities and not tileData.traversable:
 					return False
 			elif tileData == 'W':
 				return False
@@ -103,50 +123,66 @@ class GridWorld:
 
 			yield t
 
-	def getTraversableTiles(self, pos: Tile):
+	def getNearbyTraversableTiles(self, pos: Tile, excludeNonTraversableEntities = False):
 		for tile in self.getNearbyTiles(pos):
-			if not self.isTileTraversable(tile):
+			if not self.isTileTraversable(tile, excludeNonTraversableEntities):
 				continue
 
 			yield tile
 
-	def getTilesWithinManhatenDistance(self, pos: Tile, distance: int):
-		if distance == 0:
-			return [pos]
+	def djikstraSearch(self,
+		pos: Tile,
+		traversableOnly = True,
+		excludeNonTraversableEntities = False,
+		predicate = None,
+		takeCount = None,
+		maxDistance = None
+	):
+		"""
+			In a graph where the edges are varying distances, this wouldn't be efficient.
+			But we should be able to get away with it here
+		"""
+		if isinstance(predicate, type):
+			cls = predicate
+			predicate = lambda tile: any([isinstance(tileItem, cls) for tileItem in self.getTileData(tile)])
 
-		dir = 1
-		x = pos[0] - distance
-		y = pos[1]
-		for i in range(2 * distance + 1):
-			if self.isValidTile( (x, y) ):
-				yield (x, y)
-			
-			for j in range(distance if dir == 1 else distance - 1):
-				x += 1 * dir
-				y += -1 * dir
-				if self.isValidTile( (x, y) ):
-					yield (x, y)
-			y += 1
-			dir *= -1
-
-	def breadthFirstSearch(self, pos: Tile):
-		fringe = [pos]
-		visited = {pos: True}
+		fringe = PriorityQueue()
+		fringe.update(pos, 0)
+		visited = {}
 
 		while len(fringe):
-			tile = fringe.pop(0)
-			yield tile
+			tile, dist = fringe.popWithPriority()
+			if maxDistance != None and dist > maxDistance:
+				return
 
-			for nextTile in self.getTraversableTiles(tile):
+			visited[tile] = True
+			if predicate == None or predicate(tile):
+				yield (tile, dist)
+				if takeCount != None:
+					takeCount -= 1
+					if takeCount == 0:
+						return
+
+			if traversableOnly:
+				nearbyTiles = self.getNearbyTraversableTiles(tile, excludeNonTraversableEntities)
+			else:
+				nearbyTiles = self.getNearbyTiles(tile)
+
+			dist += 1
+			for nextTile in nearbyTiles:
 				if nextTile not in visited:
-					fringe.append(nextTile)
-					visited[nextTile] = True
+					fringe.update(nextTile, dist)
 
 	def getTileData(self, pos: Tile):
 		if not self.isValidTile(pos):
 			return []
 
 		return self.map[pos]
+
+	def getEntitiesAtLocation(self, pos: Tile):
+		for tileItem in self.getTileData(pos):
+			if isinstance(tileItem, AbstractTileEntity):
+				yield tileItem
 
 	def getTileEntityLocation(self, entity):
 		if entity not in self.entities:
@@ -161,6 +197,10 @@ class GridWorld:
 		if not self.isTileTraversable(pos):
 			return False
 
+		if self.isTrackingActions:
+			oldPos = self.entities[entity]
+			self.trackUndoAction(lambda: self.moveTileEntity(entity, oldPos))
+
 		self.map[entity.pos].remove(entity)
 		self.entities[entity] = pos
 		self.map[entity.pos].append(entity)
@@ -168,21 +208,39 @@ class GridWorld:
 		return True
 
 	def log(self, *args):
-		if self.logging:
+		if not self.isTrackingActions and self.logging:
 			print(*args)
+
+	def trackActions(self):
+		self.trackingActions = True
+		self.events = []
+
+	def stopTracking(self):
+		self.trackingActions = False
+		self.events = []
+
+	def trackUndoAction(self, undoFn):
+		self.events.append(undoFn)
+
+	@property
+	def isTrackingActions(self):
+		return self.trackingActions
+
+	def rollbackActions(self):
+		self.trackingActions = False
+		while len(self.events) > 0:
+			fn = self.events.pop()
+			fn()
 
 	def tick(self):
 		self.ticks += 1
 
-		if len(self.teamList):
-			self.teamNdx += 1
-			if self.teamNdx >= len(self.teamList):
-				self.teamNdx -= len(self.teamList)
-
-			team = self.teamList[self.teamNdx]
-			self.log("{}'s turn".format(team))
+		for team in self.teamList:
+			self.currentTeam = team
+			self.log("{}'s turn".format(self.currentTeam))
 			toRemove = []
-			for entity in self.teams[team]:
+
+			for entity in self.teams[self.currentTeam]:
 				if isinstance(entity, AbstractHitpointEntity) and entity.isDead:
 					self.log('Entity {} at {},{} died'.format(entity.__class__.__name__, entity.x, entity.y))
 					toRemove.append(entity)
@@ -190,11 +248,11 @@ class GridWorld:
 
 				entity.tick()
 
+				if isinstance(entity, Agent) and entity.pos == self.exitPos:
+					self.log('Agent successfully exited the dungeon')
+					toRemove.append(entity)
+
 			for entity in toRemove:
-				self.teams[team].remove(entity)
+				self.teams[self.currentTeam].remove(entity)
 				self.map[entity.pos].remove(entity)
 				self.entities.pop(entity)
-
-			if len(self.teams[team]) == 0:
-				self.teamList.remove(team)
-				self.teamNdx -= 1

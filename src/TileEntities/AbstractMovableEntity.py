@@ -1,10 +1,10 @@
 from TileEntities.Abstract import Abstract
-from Aliases.Tile import Tile
+from Aliases import Tile
 
 class AbstractMovableEntity(Abstract):
 	@property
 	def nearbyTraversableTiles(self):
-		return self.gridWorld.getTraversableTiles(self.gridWorld.getTileEntityLocation(self))
+		return self.gridWorld.getNearbyTraversableTiles(self.gridWorld.getTileEntityLocation(self))
 
 	def move(self, pos: Tile):
 		self.gridWorld.moveTileEntity(self, pos)

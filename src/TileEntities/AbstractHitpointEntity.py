@@ -9,11 +9,26 @@ class AbstractHitpointEntity(Abstract):
 		self.health = type(self).maxHitPoints
 
 	def damage(self, amount):
-		self.health = max(0, self.health - amount)
+		if amount > self.health:
+			amount = self.health
+
+		self.triggerEvent('health', health = amount * -1)
+		self.health -= amount
 		self.log('Entity {} takes {} damage. {} remaining'.format(self.__class__.__name__, amount, self.health))
 
+		if self.isTrackingActions:
+			self.trackUndoAction(lambda: self.heal(amount))
+
 	def heal(self, amount):
+		if self.health + amount > self.maxHitPoints:
+			amount = self.maxHitPoints - self.health
+
+		self.triggerEvent('health', health = amount)
 		self.health = min(type(self).maxHitPoints, self.health + amount)
+		self.log('Entity {} heals for {} health. {} remaining'.format(self.__class__.__name__, amount, self.health))
+
+		if self.isTrackingActions:
+			self.trackUndoAction(lambda: self.damage(amount))
 
 	@property
 	def isDead(self):
