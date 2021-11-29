@@ -19,9 +19,9 @@ class AbstractPerceptionEntity(Abstract):
 	def eyes(self, toPos: Tile):
 		if (self.isBlineTraceable(self.pos, toPos)):
 			if (self.isInRange(self.pos, toPos, self.distance)):
-				print("got here")
 				self.saw = True
-
+			else:
+				self.saw = False
 		else:
 			self.saw = False
 

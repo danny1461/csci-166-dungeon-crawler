@@ -10,13 +10,13 @@ class AbstractWeaponEntity(Abstract):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.wepdamage = self.weaponDamage
-        self.distance = self.weaponReach
+        self.wepdistance = self.weaponReach
         self.attackable = self.weaponAttackPossible
 
     # can our weapon reach the target
-    def canWeaponReachTarget(self, targetPos: Tile):
+    def setIfWeaponReachTarget(self, targetPos: Tile):
         if (self.isBlineTraceable(self.pos, targetPos)):
-            if (self.isInRange(self.pos, targetPos, self.distance)):
+            if (self.isInRange(self.pos, targetPos, self.wepdistance)):
                 self.attackable = True
             else:
                 self.attackable = False

@@ -101,9 +101,9 @@ class GridWorld:
 		return True
 
 	# check if a tile is in a tuple/set of tiles
-	def isTileInRange(self, fromPos: Tile, toPos: Tile):
-		for tile in fromPos:
-			if(tile == toPos):
+	def isTileInSetOfTiles(self, setOfTiles: Tile, check: Tile):
+		for tile in setOfTiles:
+			if(tile == check):
 				return True
 		
 		return False
@@ -112,7 +112,10 @@ class GridWorld:
 	def isTileBlineTraceable(self, fromPos: Tile, toPos: Tile):
 		traceable = True # default assumes we can look at starting tile, so we can see ourselves 
 		tracer = fromPos
+		initial = True   # initial trace is not checked for traverseability since the trace will bump into it's own starting position
 		while (tracer != toPos):
+			pastTracer = tracer
+			
 			xDiff = toPos[0] - tracer[0]
 			yDiff = toPos[1] - tracer[1]
 			
@@ -124,8 +127,10 @@ class GridWorld:
 				unit = yDiff / abs(yDiff)
 				tracer = ( (tracer[0], int(tracer[1] + unit)) )
 				
-			if (self.isTileTraversable(tracer)):
+			if (self.isTileTraversable(pastTracer) or initial):
+				initial = False
 				traceable = True
+				
 			else:
 				traceable = False
 				break

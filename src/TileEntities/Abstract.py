@@ -98,7 +98,7 @@ class Abstract(ABC):
 	def isInRange(self, fromTile, toTile, distance: int):
 		possibleTiles = self.gridWorld.getTilesWithinManhatenDistance(fromTile, distance)
 
-		return self.gridWorld.isTileInRange(possibleTiles, toTile)
+		return self.gridWorld.isTileInSetOfTiles(possibleTiles, toTile)
 
 	# check if a tile is traverseable
 	def isTraverseable(self, tile):

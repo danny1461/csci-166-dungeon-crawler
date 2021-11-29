@@ -4,7 +4,7 @@ from TileEntities.AbstractAggresiveEntity import AbstractAggresiveEntity
 from TileEntities.AbstractActionEntity import AbstractActionEntity
 from TileEntities.AbstractPerceptionEntity import AbstractPerceptionEntity
 from TileEntities.AbstractWeaponsEntity import AbstractWeaponEntity
-from TileEntities.AbstractPointsClass import AbstractPointsEntity
+from TileEntities.AbstractPointsEntity import AbstractPointsEntity
 
 class Agent(AbstractMovableEntity, 
 			AbstractHitpointEntity, 
@@ -25,8 +25,6 @@ class Agent(AbstractMovableEntity,
 	weaponDamage = 10
 	weaponDamageMultiplier = 2.0
 	weaponReach = 1
-
-	attackDamage = weaponDamage
 
 	direction = "left"
 
