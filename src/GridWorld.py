@@ -6,6 +6,7 @@ from TileEntities.Monster import Monster
 from TileEntities.SpikeTrap import SpikeTrap
 from Aliases import Tile
 from Utils.PriorityQueue import PriorityQueue
+from random import random
 
 class GridWorld:
 	transitionDirections = [(1, 0), (0, 1), (-1, 0), (0, -1)]
@@ -87,6 +88,9 @@ class GridWorld:
 
 		self.trainer.setGridWorld(self)
 
+	def getEntities(self):
+		return self.entities
+
 	def getEntityById(self, entityId):
 		pos = self.getTileEntityLocation(entityId)
 		for tileItem in self.getEntitiesAtLocation(pos):
@@ -113,6 +117,14 @@ class GridWorld:
 				return False
 
 		return True
+
+	# check if a tile is in a tuple/set of tiles
+	def isTileInSetOfTiles(self, setOfTiles: Tile, check: Tile):
+		for tile in setOfTiles:
+			if(tile == check):
+				return True
+		
+		return False
 
 	def getNearbyTiles(self, pos: Tile):
 		for dx, dy in GridWorld.transitionDirections:
@@ -206,6 +218,14 @@ class GridWorld:
 		self.map[entity.pos].append(entity)
 
 		return True
+
+	# get current turn of world
+	def getTurn(self):
+		return int(self.ticks/len(self.entities)) + 1
+
+	# return a random percent
+	def getRandomPercent(self):
+		return random()
 
 	def log(self, *args):
 		if not self.isTrackingActions and self.logging:
