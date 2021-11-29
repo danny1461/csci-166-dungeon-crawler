@@ -11,10 +11,12 @@ class FirstTry(Abstract):
 		result = {}
 
 		if isinstance(entity, Agent):
-			if self.gridWorld.exitPos == entity.pos:
+			exitPos, exitDist = list(self.gridWorld.djikstraSearch(entity.pos, excludeNonTraversableEntities = True, predicate = lambda tile: self.gridWorld.map[tile][0] == 'E'))[0]
+
+			if exitDist == 0:
 				result['dist_to_exit'] = 1
 			else:
-				result['dist_to_exit'] = 1 / (abs(self.gridWorld.exitPos[0] - entity.pos[0]) + abs(self.gridWorld.exitPos[1] - entity.pos[1]))
+				result['dist_to_exit'] = 1 / exitDist
 
 		for monsterTile, monsterDist in self.gridWorld.djikstraSearch(entity.pos, predicate = Monster, maxDistance = 3, excludeNonTraversableEntities = True):
 			result['can_get_hurt'] = 1 if monsterDist == 1 else 0

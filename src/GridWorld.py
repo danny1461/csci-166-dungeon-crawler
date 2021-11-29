@@ -1,3 +1,4 @@
+from Apps.TrainingApp import TrainingApp
 from TileEntities.Abstract import Abstract as AbstractTileEntity
 from TileEntities.AbstractHitpointEntity import AbstractHitpointEntity
 from TileEntities.Agent import Agent
@@ -45,6 +46,8 @@ class GridWorld:
 		self.entities: dict[AbstractTileEntity, Tile] = {}
 		self.teams: dict[str, list[AbstractTileEntity]] = {}
 		self.teamList: list[str] = []
+		self.trainer = TrainingApp()
+		
 		length = len(mapString)
 		while cursor < length:
 			c = mapString[cursor]
@@ -64,6 +67,9 @@ class GridWorld:
 				self.map[loc] = [' ', tileInst]
 				self.entities[tileInst] = loc
 
+				if isinstance(tileInst, Agent):
+					tileInst.setTrainer(self.trainer)
+
 				if tileInst.team not in self.teams:
 					self.teams[tileInst.team] = []
 					self.teamList.append(tileInst.team)
@@ -78,6 +84,8 @@ class GridWorld:
 				self.height = y + 1
 
 			x += 1
+
+		self.trainer.setGridWorld(self)
 
 	def getEntityById(self, entityId):
 		pos = self.getTileEntityLocation(entityId)
@@ -227,9 +235,8 @@ class GridWorld:
 	def tick(self):
 		self.ticks += 1
 
-		teamNdx = 0
-		while teamNdx < len(self.teams):
-			self.currentTeam = self.teamList[teamNdx]
+		for team in self.teamList:
+			self.currentTeam = team
 			self.log("{}'s turn".format(self.currentTeam))
 			toRemove = []
 
@@ -249,7 +256,3 @@ class GridWorld:
 				self.teams[self.currentTeam].remove(entity)
 				self.map[entity.pos].remove(entity)
 				self.entities.pop(entity)
-
-			if len(self.teams[self.currentTeam]) == 0:
-				self.teamList.remove(self.currentTeam)
-				teamNdx -= 1

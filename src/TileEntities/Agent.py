@@ -44,7 +44,7 @@ class Agent(AbstractMovableEntity, AbstractHitpointEntity, AbstractAggresiveEnti
 		return (bestAction, bestReward)
 
 	def learnFromExperience(self, priorFeatures: Features, reward: float):
-		print(priorFeatures, reward)
+		# print(priorFeatures, reward)
 		_, bestReward = self.getBestAction()
 		difference = (reward + self.discount * bestReward) - self.calculatePredictedReward(priorFeatures)
 		for i in priorFeatures:

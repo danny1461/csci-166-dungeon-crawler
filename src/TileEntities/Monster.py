@@ -10,7 +10,6 @@ class Monster(AbstractMovableEntity, AbstractHitpointEntity, AbstractAggresiveEn
 	attackDamage = 5
 
 	def tick(self):
-		return
 		# Is an agent right next to us?
 		agentTile = self.searchTileFirst(self.nearbyTiles, Agent)
 		if agentTile != None:
@@ -19,8 +18,7 @@ class Monster(AbstractMovableEntity, AbstractHitpointEntity, AbstractAggresiveEn
 			return
 
 		# Can we find an agent within 3 blocks?
-		agentTile = self.searchTileFirst(self.gridWorld.djikstraSearch(self.pos, maxDistance = 3), Agent)
-		if agentTile != None:
+		for agentTile, agentDist in self.gridWorld.djikstraSearch(self.pos, maxDistance = 3, predicate = Agent, excludeNonTraversableEntities = True):
 			self.log('Monster moves towards agent at:', agentTile)
 			self.moveTowards(agentTile)
 			return

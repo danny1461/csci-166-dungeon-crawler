@@ -60,6 +60,18 @@ parser.add_argument(
 		default=0.5,
 		help='How much to consider old knowledge')
 parser.add_argument(
+		'--display',
+		nargs='?',
+		type=str,
+		default='Window',
+		help='How much to consider old knowledge')
+parser.add_argument(
+		'--speed',
+		nargs='?',
+		type=float,
+		default=0.1,
+		help='How much to consider old knowledge')
+parser.add_argument(
 		'--logging',
 		nargs='?',
 		type=bool,
@@ -76,3 +88,4 @@ if commandLineArgs.trainClass == '':
 	exit('Please specify a training class')
 
 commandLineArgs.trainClass = getattr(import_module('Training.' + commandLineArgs.trainClass), commandLineArgs.trainClass)
+commandLineArgs.display = getattr(import_module('Graphics.' + commandLineArgs.display), commandLineArgs.display)

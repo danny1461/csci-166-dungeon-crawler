@@ -1,9 +1,7 @@
+from Graphics.Abstract import Abstract
 from GridWorld import GridWorld
 
-class Console:
-	def __init__(self, world: GridWorld):
-		self.gridWorld = world
-
+class Console(Abstract):
 	def render(self):
 		print('')
 		for y in range(self.gridWorld.height):

@@ -1,20 +1,21 @@
-from typing import Any
 from Aliases import Features
 from Apps.Abstract import Abstract as AbstractApp
 from TileEntities.AbstractHitpointEntity import AbstractHitpointEntity
 from TileEntities.AbstractTrainableEntity import AbstractTrainableEntity
-from GridWorld import GridWorld
 from TileEntities.Agent import Agent
 from TileEntities.Abstract import Abstract as AbstractTileEntity
 from Utils.Cli import commandLineArgs
 import os
 from random import choice, random
+import json
 
 class TrainingApp(AbstractApp):
 	def __init__(self):
 		self.entities = {}
 
 	def start(self):
+		from GridWorld import GridWorld
+
 		mapPath = os.path.join(os.getcwd(), '../dungeons/', commandLineArgs.map + '.txt')
 		f = open(mapPath, 'r')
 		try:
@@ -29,10 +30,18 @@ class TrainingApp(AbstractApp):
 			self.setGridWorld(GridWorld(fromString = self.mapData))
 			self.runIter()
 
-		for entity in self.entities:
-			print('after', entity.weights)
+		self.saveWeights()
 
-	def setGridWorld(self, world: GridWorld):
+	def saveWeights(self):
+		for entity in self.entities:
+			aiPath = os.path.join(os.getcwd(), '../ai/', self.trainer.__class__.__name__ + '_' + entity.__class__.__name__ + '.json')
+			f = open(aiPath, 'w')
+			try:
+				f.write(json.dumps(entity.weights))
+			finally:
+				f.close()
+
+	def setGridWorld(self, world):
 		AbstractTileEntity.resetNextEntityId()
 		self.gridWorld = world
 
