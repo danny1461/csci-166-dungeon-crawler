@@ -20,11 +20,8 @@ class AbstractHitpointEntity(Abstract):
 			self.trackUndoAction(lambda: self.heal(amount))
 
 	def heal(self, amount):
-		if self.health + amount > self.maxHitPoints:
-			amount = self.maxHitPoints - self.health
-
 		self.triggerEvent('health', health = amount)
-		self.health = min(type(self).maxHitPoints, self.health + amount)
+		self.health += amount
 		self.log('Entity {} heals for {} health. {} remaining'.format(self.__class__.__name__, amount, self.health))
 
 		if self.isTrackingActions:

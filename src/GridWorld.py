@@ -10,6 +10,7 @@ from random import random
 
 class GridWorld:
 	transitionDirections = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+	# transitionDirections = [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 	tileEntityMap = {
 		'A': Agent,
 		'M': Monster,
@@ -144,6 +145,7 @@ class GridWorld:
 
 	def djikstraSearch(self,
 		pos: Tile,
+		traversableFn = None,
 		traversableOnly = True,
 		excludeNonTraversableEntities = False,
 		predicate = None,
@@ -175,7 +177,9 @@ class GridWorld:
 					if takeCount == 0:
 						return
 
-			if traversableOnly:
+			if traversableFn != None:
+				nearbyTiles = [t for t in self.getNearbyTiles(tile) if traversableFn(t)]
+			elif traversableOnly:
 				nearbyTiles = self.getNearbyTraversableTiles(tile, excludeNonTraversableEntities)
 			else:
 				nearbyTiles = self.getNearbyTiles(tile)

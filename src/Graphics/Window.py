@@ -11,6 +11,7 @@ class Window(Abstract):
 
 	def __init__(self, gridWorld: GridWorld):
 		super().__init__(gridWorld)
+		self.layers = []
 		self.entities = {}
 
 		self.master = Tk()
@@ -22,20 +23,46 @@ class Window(Abstract):
 	def start(self):
 		self.master.mainloop()
 
+	def renderLayerItem(self, layer, command, coords, **kwargs):
+		layer_tag = "layer " + str(layer)
+		if layer_tag not in self.layers:
+			self.layers.append(layer_tag)
+		tags = kwargs.setdefault("tags", [])
+		tags.append(layer_tag)
+
+		id = command(coords, **kwargs)
+		for layer in sorted(self.layers):
+			self.board.lift(layer)
+
+		return id
+
+	def getEntityCoords(self, entity):
+		size = 10
+		if isinstance(entity, SpikeTrap):
+			size = 5
+
+		return (
+			entity.x * self.tileSize + size,
+			entity.y * self.tileSize + size,
+			(entity.x + 1) * self.tileSize - size,
+			(entity.y + 1) * self.tileSize - size
+		)
+
 	def createEntityReferences(self):
 		for entity in self.gridWorld.entities:
+			layer = 1
 			if isinstance(entity, Agent):
 				fill = 'yellow'
 			elif isinstance(entity, Monster):
 				fill = 'red'
 			elif isinstance(entity, SpikeTrap):
+				layer = 0
 				fill = 'gray'
 
-			rect = self.board.create_rectangle(
-				entity.x * self.tileSize + 5,
-				entity.y * self.tileSize + 5,
-				(entity.x + 1) * self.tileSize - 5,
-				(entity.y + 1) * self.tileSize - 5,
+			rect = self.renderLayerItem(
+				layer,
+				self.board.create_rectangle,
+				self.getEntityCoords(entity),
 				fill = fill, width = 1, tag = entity.id
 			)
 
@@ -44,10 +71,14 @@ class Window(Abstract):
 			}
 
 			if isinstance(entity, AbstractHitpointEntity):
-				self.entities[entity.id]['health'] = self.board.create_text(
-					entity.x * self.tileSize + (self.tileSize / 2),
-					entity.y * self.tileSize + (self.tileSize / 2),
-					fill = 'black', font = 'Times 20', text = entity.health
+				self.entities[entity.id]['health'] = self.renderLayerItem(
+					layer,
+					self.board.create_text,
+					(
+						entity.x * self.tileSize + (self.tileSize / 2),
+						entity.y * self.tileSize + (self.tileSize / 2)
+					),
+					fill = 'black', font = 'Times 14', text = entity.health
 				)
 
 	def renderStatic(self):
@@ -85,7 +116,7 @@ class Window(Abstract):
 
 	def updateTileEntity(self, entity):
 		data = self.entities[entity]
-		self.board.coords(data['main'], entity.x * self.tileSize + 5, entity.y * self.tileSize + 5, (entity.x + 1) * self.tileSize - 5, (entity.y + 1) * self.tileSize - 5)
+		self.board.coords(data['main'], *self.getEntityCoords(entity))
 
 		if 'health' in data:
 			self.board.coords(data['health'], entity.x * self.tileSize + (self.tileSize / 2), entity.y * self.tileSize + (self.tileSize / 2))

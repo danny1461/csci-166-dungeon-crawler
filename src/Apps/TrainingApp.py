@@ -59,10 +59,13 @@ class TrainingApp(AbstractApp):
 			if isinstance(entity, AbstractTrainableEntity):
 				entity.setTrainer(self)
 				entity.onAction.on(self.onEvent)
-				self.startTrackingEntity(entity)
 
 		ticks = 0
 		while len(self.gridWorld.teams['agent']) > 0 and ticks < 1000:
+			for entity in self.gridWorld.entities:
+				if isinstance(entity, AbstractTrainableEntity):
+					self.startTrackingEntity(entity)
+
 			toRemove = []
 			for team in self.gridWorld.teamList:
 				self.gridWorld.currentTeam = team
