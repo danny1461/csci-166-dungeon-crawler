@@ -2,12 +2,18 @@ from TileEntities.AbstractMovableEntity import AbstractMovableEntity
 from TileEntities.AbstractHitpointEntity import AbstractHitpointEntity
 from TileEntities.AbstractAggresiveEntity import AbstractAggresiveEntity
 from TileEntities.Agent import Agent
-from random import choice
+from random import choice, randint
 
 class Monster(AbstractMovableEntity, AbstractHitpointEntity, AbstractAggresiveEntity):
 	team = 'monster'
 	maxHitPoints = 50
 	attackDamage = 5
+	moveCooldownDefault = 2
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		# self.health = randint(50, 300)
+		self.moveCooldown = 0
 
 	def tick(self):
 		# Is an agent right next to us?
@@ -17,11 +23,16 @@ class Monster(AbstractMovableEntity, AbstractHitpointEntity, AbstractAggresiveEn
 			self.attackTile(agentTile)
 			return
 
-		# Can we find an agent within 3 blocks?
-		for agentTile, agentDist in self.gridWorld.djikstraSearch(self.pos, maxDistance = 3, predicate = Agent, excludeNonTraversableEntities = True):
-			self.log('Monster moves towards agent at:', agentTile)
-			self.moveTowards(agentTile)
+		self.moveCooldown -= 1
+		if self.moveCooldown > 0:
 			return
+		self.moveCooldown = self.moveCooldownDefault
+
+		# Can we find an agent within 3 blocks?
+		for agentTile, agentDist in self.gridWorld.djikstraSearch(self.pos, maxDistance = 6, predicate = Agent, excludeNonTraversableEntities = True):
+			self.log('Monster moves towards agent at:', agentTile)
+			if self.moveTowards(agentTile):
+				return
 
 		# Move randomly but don't move onto a tile that will attack us
 		options = []

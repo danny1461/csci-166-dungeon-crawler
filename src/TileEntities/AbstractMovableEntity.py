@@ -7,22 +7,35 @@ class AbstractMovableEntity(Abstract):
 		return self.gridWorld.getNearbyTraversableTiles(self.gridWorld.getTileEntityLocation(self))
 
 	def move(self, pos: Tile):
-		self.gridWorld.moveTileEntity(self, pos)
+		return self.gridWorld.moveTileEntity(self, pos)
 
 	def moveTowards(self, pos: Tile):
-		mePos = self.pos
-		xDiff = pos[0] - mePos[0]
-		yDiff = pos[1] - mePos[1]
+		# This is really bad code, but still better than before
+		bestTile = None
+		bestDist = float('inf')
+		for tile in self.gridWorld.getNearbyTiles(self.pos):
+			if self.gridWorld.isTileTraversable(tile):
+				for _, dist in self.gridWorld.djikstraSearch(tile, traversableFn = self.traverableFn(pos), predicate = self.predicateFn(pos)):
+					if dist < bestDist:
+						bestTile = tile
+						bestDist = dist
+						break
 
-		if abs(xDiff) >= abs(yDiff):
-			unit = xDiff / abs(xDiff)
-			nextPos = (int(mePos[0] + unit), mePos[1])
-			if self.gridWorld.isTileTraversable(nextPos):
-				self.move( nextPos )
-				return
-				
-		if yDiff != 0:
-			unit = yDiff / abs(yDiff)
-			nextPos = (mePos[0], int(mePos[1] + unit))
-			if self.gridWorld.isTileTraversable(nextPos):
-				self.move( nextPos )
+		if bestTile != None:
+			return self.move(bestTile)
+		
+		return False
+
+	def traverableFn(self, target):
+		def fn(foundTile):
+			if foundTile == target or foundTile == self.pos:
+				return True
+			return self.gridWorld.isTileTraversable(foundTile)
+		
+		return fn
+
+	def predicateFn(self, target):
+		def fn(foundTile):
+			return foundTile == target
+
+		return fn
