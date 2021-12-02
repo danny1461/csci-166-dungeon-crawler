@@ -42,10 +42,10 @@ parser.add_argument(
 		default=1000,
 		help='How many iterations to train with')
 parser.add_argument(
-		'--episolon',
+		'--epsilon',
 		nargs='?',
 		type=float,
-		default=0,
+		default=0.5,
 		help='How often to take a random learning action')
 parser.add_argument(
 		'--alpha',
@@ -69,7 +69,7 @@ parser.add_argument(
 		'--speed',
 		nargs='?',
 		type=float,
-		default=0.1,
+		default=0.3,
 		help='How much to consider old knowledge')
 parser.add_argument(
 		'--logging',

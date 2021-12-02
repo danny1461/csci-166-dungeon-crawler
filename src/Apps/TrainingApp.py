@@ -59,9 +59,13 @@ class TrainingApp(AbstractApp):
 			if isinstance(entity, AbstractTrainableEntity):
 				entity.setTrainer(self)
 				entity.onAction.on(self.onEvent)
-				self.startTrackingEntity(entity)
 
-		while len(self.gridWorld.teams['agent']) > 0:
+		ticks = 0
+		while len(self.gridWorld.teams['agent']) > 0 and ticks < 1000:
+			for entity in self.gridWorld.entities:
+				if isinstance(entity, AbstractTrainableEntity):
+					self.startTrackingEntity(entity)
+
 			toRemove = []
 			for team in self.gridWorld.teamList:
 				self.gridWorld.currentTeam = team
@@ -74,8 +78,8 @@ class TrainingApp(AbstractApp):
 
 					if isinstance(entity, AbstractTrainableEntity):
 						# random action or intentional?
-						if random() < commandLineArgs.episolon:
-							action = choice(entity.getAllActions())
+						if random() < commandLineArgs.epsilon:
+							action = choice(list(entity.getAllActions()))
 							entity.takeAction(action)
 						else:
 							entity.tick()
@@ -84,7 +88,10 @@ class TrainingApp(AbstractApp):
 
 					if isinstance(entity, Agent) and entity.pos == self.gridWorld.exitPos:
 						toRemove.append((team, entity))
+
 			# round complete, train entities
+			ticks += 1
+
 			for entity in self.entities:
 				reward = self.evaluateReward(entity)
 				entity.learnFromExperience(self.getPriorFeatures(entity), reward)
@@ -95,6 +102,8 @@ class TrainingApp(AbstractApp):
 				self.gridWorld.entities.pop(entity)
 
 		self.iterLeft -= 1
+		for entity in self.entities:
+			print(entity.__class__.__name__, entity.weights)
 
 	def onEvent(self, entity, eventName, params):
 		if self.gridWorld.isTrackingActions:
