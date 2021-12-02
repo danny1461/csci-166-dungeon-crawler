@@ -1,47 +1,77 @@
+from Aliases import Features
 from TileEntities.AbstractMovableEntity import AbstractMovableEntity
 from TileEntities.AbstractHitpointEntity import AbstractHitpointEntity
 from TileEntities.AbstractAggresiveEntity import AbstractAggresiveEntity
-from TileEntities.AbstractActionEntity import AbstractActionEntity
 from TileEntities.AbstractPerceptionEntity import AbstractPerceptionEntity
 from TileEntities.AbstractWeaponsEntity import AbstractWeaponEntity
-from TileEntities.AbstractPointsEntity import AbstractPointsEntity
+from TileEntities.AbstractTrainableEntity import AbstractTrainableEntity
+from Utils.Weights import Weights
+from Utils.Cli import commandLineArgs
 
 class Agent(AbstractMovableEntity, 
 			AbstractHitpointEntity, 
 			AbstractAggresiveEntity, 
-			AbstractActionEntity, 
-			AbstractPerceptionEntity, 
-			AbstractWeaponEntity, 
-			AbstractPointsEntity):
+			AbstractTrainableEntity,
+			AbstractPerceptionEntity,
+			AbstractWeaponEntity):
 
 	team = 'agent'
 	maxHitPoints = 100
 	attackDamage = 10
-	pointsTotal = 0
 	# action cost is how many turns it will take to do an action
-	perceptionViewDistance = 10
+	perceptionViewDistance = 3
 	actionCost = 3
 	weaponName = "default_weapon"
 	weaponDamage = 10
 	weaponDamageMultiplier = 2.0
 	weaponReach = 1
 
-	direction = "left"
+	# set attack damage to do the weapon damage for now (so it simply replaces attack damage with weapon damage)
+	#attackDamage = weaponDamage
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.discount = commandLineArgs.discount
+		self.alpha  = commandLineArgs.alpha
+		self.weights = Weights(randomize = True)
+
+	def getAllActions(self):
+		for tile in self.nearbyTiles:
+			if self.gridWorld.isTileTraversable(tile):
+				yield ('move', [tile])
+			for tileItem in self.gridWorld.getTileData(tile):
+				if isinstance(tileItem, AbstractHitpointEntity):
+					yield ('attackEntity', [tileItem])
+
+	def getBestAction(self):
+		allActions = list(self.getAllActions())
+		if len(allActions) == 0:
+			return (None, 0)
+
+		bestAction = None
+		bestReward = None
+
+		for action in allActions:
+			features = self.simulateActionAndGetFeatures(action)
+			predictedReward = self.calculatePredictedReward(features)
+			
+			if bestReward == None or predictedReward > bestReward:
+				bestAction = action
+				bestReward = predictedReward
+
+		return (bestAction, bestReward)
+
+	def learnFromExperience(self, priorFeatures: Features, reward: float):
+		# print(priorFeatures, reward)
+		_, bestReward = self.getBestAction()
+		difference = (reward + self.discount * bestReward) - self.calculatePredictedReward(priorFeatures)
+		for i in priorFeatures:
+			self.weights[i] = self.weights[i] + self.alpha * difference * priorFeatures[i]
+
+	def calculatePredictedReward(self, features: Features):
+		return sum([features[i] * self.weights[i] for i in features])
 
 	def tick(self):
-		self.log("Position: ", self.pos)
-		#self.log(self.turn)
-		#self.actionCounter(self.actionCost)
-		#self.log(self.randomPercent)
-		#self.actionChance(1)
-		#self.log(self.chanceSuccessful)
-		#self.eyes((2,2))
-		#print("Did see the object: ", self.didSee)
-		#self.hasLineOfSight((2,2))
-		#print("Line of sight: ", self.los)
-		#self.move((2,10))
-		if(self.pos[0] == 1):
-			self.direction = "right"
-		self.moveDirection(self.direction)
-
-		self.log(self.team, "end log")
+		bestAction, _ = self.getBestAction()
+		if bestAction != None:
+			self.takeAction(bestAction)

@@ -1,10 +1,14 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, ValuesView
+from os import stat
+from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from GridWorld import GridWorld
 
 from abc import ABC, abstractmethod
+from copy import copy
+from Decorators.Events import classEvents
 
+@classEvents('onAction')
 class Abstract(ABC):
 	nextId = 1
 
@@ -12,10 +16,17 @@ class Abstract(ABC):
 	team = 'gaia'
 
 	def __init__(self, gridWorld: GridWorld):
-		self.id = Abstract.nextId
-		Abstract.nextId += 1
+		self.id = Abstract.getNextEntityId()
 
 		self.gridWorld = gridWorld
+
+	def clone(self):
+		"""
+			Returns a replica instance but with a new Entity Id
+		"""
+		clone = copy(self)
+		clone.id = Abstract.getNextEntityId()
+		return clone
 
 	def __hash__(self):
 		return self.id
@@ -60,6 +71,9 @@ class Abstract(ABC):
 	def log(self, *args):
 		self.gridWorld.log(*args)
 
+	def triggerEvent(self, evtName, **kwargs):
+		self.onAction.fire(self, evtName, kwargs)
+
 	def searchTile(self, tileIteratable, predicate):
 		if isinstance(predicate, type):
 			cls = predicate
@@ -96,8 +110,9 @@ class Abstract(ABC):
 
 	# check if tile is viewable from a given tile using a distance
 	def isInRange(self, fromTile, toTile, distance: int):
-		possibleTiles = self.gridWorld.getTilesWithinManhatenDistance(fromTile, distance)
-
+		# change to lambda later, for now it just uses the list directly generated from djikstraSearch (not very efficient)
+		possibleTiles = [first[0] for first in self.gridWorld.djikstraSearch(fromTile, traversableOnly = False, maxDistance = distance)]
+		
 		return self.gridWorld.isTileInSetOfTiles(possibleTiles, toTile)
 
 	# check if a tile is traverseable
@@ -121,3 +136,20 @@ class Abstract(ABC):
 
 		return viewable
 	"""
+	@property
+	def isTrackingActions(self):
+		return self.gridWorld.isTrackingActions
+
+	def trackUndoAction(self, undoFn):
+		self.gridWorld.trackUndoAction(undoFn)
+
+	@staticmethod
+	def getNextEntityId():
+		try:
+			return Abstract.nextId
+		finally:
+			Abstract.nextId += 1
+
+	@staticmethod
+	def resetNextEntityId():
+		Abstract.nextId = 1

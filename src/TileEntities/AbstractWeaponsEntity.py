@@ -1,5 +1,5 @@
 from TileEntities.Abstract import Abstract
-from Aliases.Tile import Tile
+from Aliases import Tile
 
 class AbstractWeaponEntity(Abstract):
     weaponName = "default_weapon"
@@ -9,9 +9,9 @@ class AbstractWeaponEntity(Abstract):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.wepdamage = self.weaponDamage
-        self.wepdistance = self.weaponReach
-        self.attackable = self.weaponAttackPossible
+        self.wepdamage = type(self).weaponDamage
+        self.wepdistance = type(self).weaponReach
+        self.attackable = type(self).weaponAttackPossible
 
     # can our weapon reach the target
     def setIfWeaponReachTarget(self, targetPos: Tile):
