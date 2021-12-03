@@ -19,7 +19,6 @@ class ThirdTry(Abstract):
 
 			canAttack = False
 			damageToTake = 0
-			# monsterDistance = None
 			for tile, dist in self.gridWorld.djikstraSearch(entity.pos, predicate = AbstractAggresiveEntity, excludeNonTraversableEntities = True, maxDistance = 4):
 				for tileEntity in self.gridWorld.getEntitiesAtLocation(tile, AbstractAggresiveEntity):
 					if tileEntity == entity:
@@ -31,15 +30,10 @@ class ThirdTry(Abstract):
 						if dist == 0:
 							damageToTake += tileEntity.attackDamage
 					else:
-						# if monsterDistance == None or dist < monsterDistance:
-						# 	monsterDistance = dist
 						if dist == 1:
 							damageToTake += tileEntity.attackDamage
 							canAttack = True
 
-			# result['will_get_hurt'] = min(damageToTake, 1)
-			# if monsterDistance != None:
-			# 	result['dist_to_monster'] = 1 / monsterDistance
 			result['will_die'] = 1 if entity.health <= damageToTake else 0
 			result['can_attack'] = 1 if canAttack else 0
 
