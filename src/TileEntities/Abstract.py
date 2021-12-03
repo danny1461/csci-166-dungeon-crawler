@@ -37,6 +37,10 @@ class Abstract(ABC):
 		return self.id == other
 
 	@property
+	def allEntities(self):
+		return self.gridWorld.getEntities()
+
+	@property
 	def pos(self):
 		return self.gridWorld.getTileEntityLocation(self)
 
@@ -51,6 +55,14 @@ class Abstract(ABC):
 	@property
 	def nearbyTiles(self):
 		return self.gridWorld.getNearbyTiles(self.gridWorld.getTileEntityLocation(self))
+
+	@property
+	def turn(self):
+		return self.gridWorld.getTurn()
+
+	@property
+	def randomPercent(self):
+		return self.gridWorld.getRandomPercent()
 
 	@abstractmethod
 	def tick(self):
@@ -96,6 +108,34 @@ class Abstract(ABC):
 
 		return (None, None)
 
+	# check if tile is viewable from a given tile using a distance
+	def isInRange(self, fromTile, toTile, distance: int):
+		# change to lambda later, for now it just uses the list directly generated from djikstraSearch (not very efficient)
+		possibleTiles = [first[0] for first in self.gridWorld.djikstraSearch(fromTile, traversableOnly = False, maxDistance = distance)]
+		
+		return self.gridWorld.isTileInSetOfTiles(possibleTiles, toTile)
+
+	# check if a tile is traverseable
+	def isTraverseable(self, tile):
+		return self.gridWorld.isTileTraversable(tile)
+
+	# check if a tile is directly traceable via a B-line
+	def isBlineTraceable(self, fromTile, toTile):
+		return self.gridWorld.isTileBlineTraceable(fromTile, toTile)
+
+	"""
+	If we have time later to perhaps implement properly...
+
+	# get tiles from some viewable tiles (mutiple and attempt to return a dictionary)
+	def tilesToPossiblyView(self, tilesIterable, toTiles, distance: int):
+		viewable = {'distance': distance}
+		for fromTile in tilesIterable:
+			for toTile in toTiles:
+				if(self.isPossiblyViewable(fromTile, toTile, distance)):
+					viewable[fromTile] = toTile
+
+		return viewable
+	"""
 	@property
 	def isTrackingActions(self):
 		return self.gridWorld.isTrackingActions

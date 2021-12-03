@@ -2,14 +2,32 @@ from Aliases import Features
 from TileEntities.AbstractMovableEntity import AbstractMovableEntity
 from TileEntities.AbstractHitpointEntity import AbstractHitpointEntity
 from TileEntities.AbstractAggresiveEntity import AbstractAggresiveEntity
+from TileEntities.AbstractPerceptionEntity import AbstractPerceptionEntity
+from TileEntities.AbstractWeaponsEntity import AbstractWeaponEntity
 from TileEntities.AbstractTrainableEntity import AbstractTrainableEntity
 from Utils.Weights import Weights
 from Utils.Cli import commandLineArgs
 
-class Agent(AbstractMovableEntity, AbstractHitpointEntity, AbstractAggresiveEntity, AbstractTrainableEntity):
+class Agent(AbstractMovableEntity, 
+			AbstractHitpointEntity, 
+			AbstractAggresiveEntity, 
+			AbstractTrainableEntity,
+			AbstractPerceptionEntity,
+			AbstractWeaponEntity):
+
 	team = 'agent'
 	maxHitPoints = 100
 	attackDamage = 10
+	# action cost is how many turns it will take to do an action
+	perceptionViewDistance = 3
+	actionCost = 3
+	weaponName = "default_weapon"
+	weaponDamage = 10
+	weaponDamageMultiplier = 2.0
+	weaponReach = 1
+
+	# set attack damage to do the weapon damage for now (so it simply replaces attack damage with weapon damage)
+	#attackDamage = weaponDamage
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)

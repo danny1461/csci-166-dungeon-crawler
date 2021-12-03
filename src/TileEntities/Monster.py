@@ -1,13 +1,31 @@
 from TileEntities.AbstractMovableEntity import AbstractMovableEntity
 from TileEntities.AbstractHitpointEntity import AbstractHitpointEntity
 from TileEntities.AbstractAggresiveEntity import AbstractAggresiveEntity
+from TileEntities.AbstractActionEntity import AbstractActionEntity
+from TileEntities.AbstractPerceptionEntity import AbstractPerceptionEntity
+from TileEntities.AbstractWeaponsEntity import AbstractWeaponEntity
 from TileEntities.Agent import Agent
 from random import choice
 
-class Monster(AbstractMovableEntity, AbstractHitpointEntity, AbstractAggresiveEntity):
+class Monster(AbstractMovableEntity, 
+			AbstractHitpointEntity, 
+			AbstractAggresiveEntity, 
+			AbstractActionEntity, 
+			AbstractPerceptionEntity, 
+			AbstractWeaponEntity):
+
 	team = 'monster'
-	maxHitPoints = 50
-	attackDamage = 5
+	maxHitPoints = 100
+	attackDamage = 10
+	# action cost is how many turns it will take to do an action
+	perceptionViewDistance = 3
+	actionCost = 2
+	weaponName = "claws"
+	weaponDamage = 20
+	weaponDamageMultiplier = 2.0
+	weaponReach = 1
+
+	#attackDamage = weaponDamage
 
 	def tick(self):
 		# Is an agent right next to us?
