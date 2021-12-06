@@ -15,8 +15,8 @@ class Monster(AbstractMovableEntity,
 			AbstractWeaponEntity):
 
 	team = 'monster'
-	maxHitPoints = 100
-	attackDamage = 10
+	maxHitPoints = 50
+	attackDamage = 5
 	# action cost is how many turns it will take to do an action
 	perceptionViewDistance = 3
 	actionCost = 2
