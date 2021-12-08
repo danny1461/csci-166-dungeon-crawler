@@ -10,31 +10,37 @@ from typing import cast
 import math
 
 class ThirdTry(Abstract):
+	def __init__(self, gridWorld):
+		super().__init__(gridWorld)
+		self.exitMap = self.gridWorld.djikstraAdjacencyMap(self.gridWorld.exitPos, excludeNonTraversableEntities = True)
+
 	def getFeatures(self, entity: AbstractTrainableEntity) -> Features:
 		result = {}
 
 		if isinstance(entity, Agent):
-			exitPos, exitDist = list(self.gridWorld.djikstraSearch(entity.pos, excludeNonTraversableEntities = True, predicate = lambda tile: self.gridWorld.map[tile][0] == 'E'))[0]
-			result['dist_to_exit'] = 1 / (exitDist + 1)
+			dist = self.exitMap[entity.pos]['dist']
+			result['dist_to_exit'] = 1 / (dist + 1)
 
 			canAttack = False
 			damageToTake = 0
-			for tile, dist in self.gridWorld.djikstraSearch(entity.pos, predicate = AbstractAggresiveEntity, excludeNonTraversableEntities = True, maxDistance = 4):
+			for tile, data in self.gridWorld.djikstraSearch(entity.pos, predicate = AbstractAggresiveEntity, excludeNonTraversableEntities = True, maxDistance = 4):
 				for tileEntity in self.gridWorld.getEntitiesAtLocation(tile, AbstractAggresiveEntity):
-					if tileEntity == entity:
+					if tileEntity.team == entity.team:
 						continue
 					
 					tileEntity = cast(AbstractAggresiveEntity, tileEntity)
 
 					if isinstance(tileEntity, SpikeTrap):
-						if dist == 0:
+						if data['dist'] == 0:
 							damageToTake += tileEntity.attackDamage
 					else:
-						if dist == 1:
-							damageToTake += tileEntity.attackDamage
+						if data['dist'] == 1:
 							canAttack = True
+							if not isinstance(tileEntity, Monster) or tileEntity.cooldown <= 1:
+								damageToTake += tileEntity.attackDamage
 
 			result['will_die'] = 1 if entity.health <= damageToTake else 0
+			# result['near_death'] = 1 if entity.health <= 15 else 0
 			result['can_attack'] = 1 if canAttack else 0
 
 		return result

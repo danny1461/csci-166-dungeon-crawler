@@ -8,6 +8,7 @@ from tkinter import *
 
 class Window(Abstract):
 	tileSize = 50
+	drawHealth = True
 
 	def __init__(self, gridWorld: GridWorld):
 		super().__init__(gridWorld)
@@ -70,7 +71,7 @@ class Window(Abstract):
 				'main': rect
 			}
 
-			if isinstance(entity, AbstractHitpointEntity):
+			if self.drawHealth and isinstance(entity, AbstractHitpointEntity):
 				self.entities[entity.id]['health'] = self.renderLayerItem(
 					layer,
 					self.board.create_text,

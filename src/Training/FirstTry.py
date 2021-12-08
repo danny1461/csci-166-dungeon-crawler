@@ -11,16 +11,16 @@ class FirstTry(Abstract):
 		result = {}
 
 		if isinstance(entity, Agent):
-			exitPos, exitDist = list(self.gridWorld.djikstraSearch(entity.pos, excludeNonTraversableEntities = True, predicate = lambda tile: self.gridWorld.map[tile][0] == 'E'))[0]
+			exitPos, data = list(self.gridWorld.djikstraSearch(entity.pos, excludeNonTraversableEntities = True, predicate = lambda tile: self.gridWorld.map[tile][0] == 'E'))[0]
 
-			if exitDist == 0:
+			if data['dist'] == 0:
 				result['dist_to_exit'] = 1
 			else:
-				result['dist_to_exit'] = 1 / exitDist
+				result['dist_to_exit'] = 1 / data['dist']
 
-		for monsterTile, monsterDist in self.gridWorld.djikstraSearch(entity.pos, predicate = Monster, maxDistance = 3, excludeNonTraversableEntities = True):
-			result['can_get_hurt'] = 1 if monsterDist == 1 else 0
-			result['dist_to_monster'] = 1 / monsterDist
+		for monsterTile, data in self.gridWorld.djikstraSearch(entity.pos, predicate = Monster, maxDistance = 3, excludeNonTraversableEntities = True):
+			result['can_get_hurt'] = 1 if data['dist'] == 1 else 0
+			result['dist_to_monster'] = 1 / data['dist']
 
 			monster = [e for e in self.gridWorld.getEntitiesAtLocation(monsterTile) if isinstance(e, Monster)][0]
 			hitsToKill = math.ceil(monster.health / entity.attackDamage)

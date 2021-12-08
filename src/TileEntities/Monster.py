@@ -7,15 +7,20 @@ from random import choice, randint
 class Monster(AbstractMovableEntity, AbstractHitpointEntity, AbstractAggresiveEntity):
 	team = 'monster'
 	maxHitPoints = 50
-	attackDamage = 5
-	moveCooldownDefault = 2
+	attackDamage = 20
+	actionCooldownDefault = 2
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		# self.health = randint(50, 300)
-		self.moveCooldown = 0
+		self.cooldown = randint(0, self.actionCooldownDefault)
 
 	def tick(self):
+		self.cooldown -= 1
+		if self.cooldown > 0:
+			return
+		self.cooldown = self.actionCooldownDefault
+
 		# Is an agent right next to us?
 		agentTile = self.searchTileFirst(self.nearbyTiles, Agent)
 		if agentTile != None:
@@ -23,13 +28,8 @@ class Monster(AbstractMovableEntity, AbstractHitpointEntity, AbstractAggresiveEn
 			self.attackTile(agentTile)
 			return
 
-		self.moveCooldown -= 1
-		if self.moveCooldown > 0:
-			return
-		self.moveCooldown = self.moveCooldownDefault
-
 		# Can we find an agent within 3 blocks?
-		for agentTile, agentDist in self.gridWorld.djikstraSearch(self.pos, maxDistance = 6, predicate = Agent, excludeNonTraversableEntities = True):
+		for agentTile, data in self.gridWorld.djikstraSearch(self.pos, maxDistance = 6, predicate = Agent, excludeNonTraversableEntities = True):
 			self.log('Monster moves towards agent at:', agentTile)
 			if self.moveTowards(agentTile):
 				return

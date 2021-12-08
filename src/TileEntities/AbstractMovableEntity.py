@@ -10,20 +10,11 @@ class AbstractMovableEntity(Abstract):
 		return self.gridWorld.moveTileEntity(self, pos)
 
 	def moveTowards(self, pos: Tile):
-		# This is really bad code, but still better than before
-		bestTile = None
-		bestDist = float('inf')
-		for tile in self.gridWorld.getNearbyTiles(self.pos):
-			if self.gridWorld.isTileTraversable(tile):
-				for _, dist in self.gridWorld.djikstraSearch(tile, traversableFn = self.traverableFn(pos), predicate = self.predicateFn(pos)):
-					if dist < bestDist:
-						bestTile = tile
-						bestDist = dist
-						break
+		adjacencyMap = self.gridWorld.djikstraAdjacencyMap(pos, traversableFn = self.traverableFn(pos))
 
-		if bestTile != None:
-			return self.move(bestTile)
-		
+		if self.pos in adjacencyMap:
+			return self.move(adjacencyMap[self.pos]['previous'])
+
 		return False
 
 	def traverableFn(self, target):

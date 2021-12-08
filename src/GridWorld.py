@@ -161,17 +161,24 @@ class GridWorld:
 			predicate = lambda tile: any([isinstance(tileItem, cls) for tileItem in self.getTileData(tile)])
 
 		fringe = PriorityQueue()
-		fringe.update(pos, 0)
+		fringe.update((pos, None), 0)
 		visited = {}
+		data = {
+			'dist': None,
+			'previous': (None, None)
+		}
 
 		while len(fringe):
-			tile, dist = fringe.popWithPriority()
+			(tile, previous), dist = fringe.popWithPriority()
 			if maxDistance != None and dist > maxDistance:
 				return
 
 			visited[tile] = True
 			if predicate == None or predicate(tile):
-				yield (tile, dist)
+				data['dist'] = dist
+				data['previous'] = previous
+				yield (tile, data)
+
 				if takeCount != None:
 					takeCount -= 1
 					if takeCount == 0:
@@ -187,7 +194,20 @@ class GridWorld:
 			dist += 1
 			for nextTile in nearbyTiles:
 				if nextTile not in visited:
-					fringe.update(nextTile, dist)
+					fringe.update((nextTile, tile), dist)
+
+	def djikstraAdjacencyMap(self,
+		pos: Tile,
+		traversableFn = None,
+		traversableOnly = True,
+		excludeNonTraversableEntities = False,
+		maxDistance = None
+	):
+		result = {}
+		for tile, data in self.djikstraSearch(pos, traversableFn, traversableOnly, excludeNonTraversableEntities, maxDistance = maxDistance):
+			result[tile] = data.copy()
+
+		return result
 
 	def getTileData(self, pos: Tile):
 		if not self.isValidTile(pos):
